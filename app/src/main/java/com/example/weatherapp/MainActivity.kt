@@ -3,6 +3,7 @@ package com.example.weatherapp
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -12,6 +13,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.ViewModelProvider
 import com.example.weatherapp.data.retrofit.WeatherModel
+import com.example.weatherapp.domain.AuthViewModel
+import com.example.weatherapp.domain.MyAppNavigation
 import com.example.weatherapp.domain.WeatherViewModel
 import com.example.weatherapp.presentation.WeatherPage
 import com.example.weatherapp.ui.theme.WeatherAppTheme
@@ -21,10 +24,11 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         val weatherViewModel= ViewModelProvider(this)[WeatherViewModel::class.java]
+        val authViewModel : AuthViewModel by viewModels()
         setContent {
             WeatherAppTheme {
                 // A surface container using the 'background' color from the theme
-                WeatherPage(weatherViewModel)
+                MyAppNavigation(authViewModel =authViewModel , weatherViewModel = weatherViewModel)
             }
         }
     }

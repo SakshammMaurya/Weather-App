@@ -23,7 +23,10 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CardElevation
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -34,18 +37,27 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.weatherapp.R
 import com.example.weatherapp.data.retrofit.WeatherModel
+import com.example.weatherapp.domain.AuthState
+import com.example.weatherapp.domain.AuthViewModel
 import com.example.weatherapp.domain.WeatherViewModel
 
 @Composable
-fun WeatherDetails2(data: WeatherModel) {
+fun WeatherDetails2(data: WeatherModel,authViewModel: AuthViewModel, navController: NavController) {
     val localTime = data.location.localtime.split(" ");
     val date = localTime[0];
     val time = localTime[1];
     val hardTime = localTime[1].split(":")[0]
-
+    val authState = authViewModel.authState.observeAsState()
+    LaunchedEffect(authState.value ){
+        when(authState.value) {
+            is AuthState.Unauthenticated -> navController.navigate("login")
+            else -> Unit
+        }
+    }
     // outer box
     Box(
         modifier = Modifier.fillMaxSize()
@@ -141,7 +153,9 @@ fun WeatherDetails2(data: WeatherModel) {
                             color = Color.White,
                         )
                     }
-
+                    TextButton(onClick = {authViewModel.signout()}) {
+                        Text(text = "Sign out")
+                    }
                 }
             }
         }
@@ -226,3 +240,5 @@ fun WeatherKeyValue(key: String, value: String) {
 
 
 }
+
+

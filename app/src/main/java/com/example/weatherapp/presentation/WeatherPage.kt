@@ -25,7 +25,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -40,14 +42,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.weatherapp.R
 import com.example.weatherapp.data.retrofit.NetworkResponse
 import com.example.weatherapp.data.retrofit.WeatherModel
+import com.example.weatherapp.domain.AuthState
+import com.example.weatherapp.domain.AuthViewModel
 import com.example.weatherapp.domain.WeatherViewModel
 
 @Composable
-fun WeatherPage(viewModel: WeatherViewModel) {
+fun WeatherPage(modifier: Modifier,viewModel: WeatherViewModel,navController: NavController,authViewModel: AuthViewModel) {
 
     var city by remember { mutableStateOf("") }
 
@@ -55,6 +60,14 @@ fun WeatherPage(viewModel: WeatherViewModel) {
 
     val location = remember {
         mutableStateOf("")
+    }
+
+    val authState = authViewModel.authState.observeAsState()
+    LaunchedEffect(authState.value ){
+        when(authState.value) {
+            is AuthState.Unauthenticated -> navController.navigate("login")
+            else -> Unit
+        }
     }
     Box(
         modifier = Modifier
@@ -95,16 +108,17 @@ fun WeatherPage(viewModel: WeatherViewModel) {
 
                 NetworkResponse.Loading -> {
                     Box(
-                        modifier = Modifier.fillMaxWidth().fillMaxWidth().padding(top=150.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .fillMaxWidth()
+                            .padding(top = 150.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         CircularProgressIndicator()
                     }
                 }
 
-                is NetworkResponse.Success -> {
-                    WeatherDetails2(data = result.data)
-                }
+                is NetworkResponse.Success -> WeatherDetails2(data = result.data,authViewModel,navController)
 
                 null -> {}
             }
@@ -156,50 +170,3 @@ fun WeatherPage(viewModel: WeatherViewModel) {
     }
 
 }
-
-//@Composable
-//fun WeatherDetails(data: WeatherModel) {
-//
-//    Column(
-//        modifier = Modifier
-//            .fillMaxWidth()
-//            .padding(vertical = 8.dp),
-//        horizontalAlignment = Alignment.CenterHorizontally,
-//        //   verticalArrangement = Arrangement.Center
-//    ) {
-//        Row(
-//            modifier = Modifier.fillMaxWidth(),
-//            horizontalArrangement = Arrangement.Start,
-//            verticalAlignment = Alignment.Bottom
-//        ) {
-//            Icon(
-//                imageVector = Icons.Default.LocationOn,
-//                contentDescription = " Location icon",
-//                modifier = Modifier.size(40.dp)
-//            )
-//            Text(text = data.location.name, fontSize = 30.sp)
-//            Spacer(modifier = Modifier.width(8.dp))
-//            Text(text = data.location.country, fontSize = 18.sp, color = Color.Gray)
-//        }
-//
-//        Spacer(modifier = Modifier.height(16.dp))
-//        Text(
-//            text = "${data.current.temp_c}+ °C",
-//            fontSize = 56.sp,
-//            fontWeight = FontWeight.Bold,
-//            textAlign = TextAlign.Center
-//        )
-//        AsyncImage(
-//            modifier = Modifier.size(160.dp),
-//            model = "https:${data.current.condition.icon}".replace("64x64", "128x128"),
-//            contentDescription = " Condition Icon"
-//        )
-//        Text(
-//            text = data.current.condition.text,
-//            fontSize = 20.sp,
-//            color = Color.Gray,
-//            textAlign = TextAlign.Center
-//        )
-//    }
-//
-//}
